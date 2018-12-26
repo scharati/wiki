@@ -1,0 +1,33 @@
+{% extends "wikiapp-template.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-3">
+        </div>
+        <div class="col-6">
+            <h3 class="text-center"> Login </h3>
+            <form action="/authenticate" method="post">
+                <div class="form-group">
+                    <label for="user-email">
+                        E-mail Address
+                    </label>
+                    <input type="email" class="form-control" id="user-email" name="user_name" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-password">
+                        Password
+                    </label>
+                    <input type="password" class="form-control" id="user-password" name="user_password" placeholder="enter password" required>
+                </div>
+                <div class="form-group text-center">
+                    <button class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-3">
+        </div>
+    </div>
+</div>
+{% endblock %}
