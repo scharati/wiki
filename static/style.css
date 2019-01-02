@@ -3,8 +3,13 @@ footer {
     height: 100px;
     bottom: 0;
     width: 100%;
-}
+};
 
-textarea{
-    height: 100%;
-}
+#page-content{
+    height: 100vh;
+};
+
+.error{
+    color: red;
+};
+

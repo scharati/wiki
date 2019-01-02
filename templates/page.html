@@ -1,12 +1,22 @@
 {% extends "wikiapp-template.html" %}
 {% block content %}
 <div class="container">
-    {% if user %}
-    <a href = {{ url_for("show_edit_page", title = page.title) }}> edit </a>
-    {% endif %}
-    <div>Title: </div>
-    {{page.title}}
-    <div> Content: </div>
-    {{page.content}}
+    <div class="card">
+            {% if user %}
+            <a href = {{ url_for("show_edit_page", title = page.title) }}> edit </a>
+            <hr>
+            {% endif %}
+        <div class="h4 card-title">
+                {{page.title}}
+            <div class="text-monospace">
+   
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="card-text text-monospace">
+                {{page.content | safe}}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

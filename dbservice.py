@@ -9,11 +9,15 @@ engine = create_engine(db_url, connect_args={'check_same_thread': False})
 Session = sessionmaker(bind=engine)
 session = Session()
 
-def get_user_by_name(name):
+def get_user_by_name( name ):
     user = session.query(User).filter( User.username == name ).one()
     return user
 
-def get_wikipage_by_title(page_title):
+def get_user_by_id( user_id ):
+    user = session.query(User).filter( User.id == user_id ).one()
+    return user
+
+def get_wikipage_by_title( page_title ):
     page = session.query(Wikipage).filter(Wikipage.title == page_title).one()
     return page
 

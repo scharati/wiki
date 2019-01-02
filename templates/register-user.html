@@ -7,13 +7,16 @@
         <div class="col-3">
         </div>
         <div class="col-6">
-            <h3 class="text-center"> Login </h3>
-            <form action="/authenticate" method="post">
+            <h3 class="text-center"> Register User </h3>
+            <form action="/createuser" method="post">
                 <div class="form-group">
                     <label for="user-email">
                         E-mail Address
                     </label>
                     <input type="email" class="form-control" id="user-email" name="user_name" placeholder="name@example.com" required>
+                    {% if errors and errors.get("email"): %}
+                    <span>{{errors.get("email")}}</span>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="user-password">
@@ -21,21 +24,19 @@
                     </label>
                     <input type="password" class="form-control" id="user-password" name="user_password" placeholder="enter password" required>
                 </div>
+                <div class="form-group">
+                        <label for="confirm-user-password">
+                            Confirm Password
+                        </label>
+                        <input type="password" class="form-control" id="confirm-user-password" name="confirm_password" placeholder="enter password" required>
+                        {% if errors and errors.get("mismatch"): %}
+                        <span class="alert alert-danger">{{errors.get("mismatch")}}</span>
+                        {% endif %}                     
+                </div>
                 <div class="form-group text-center">
                     <button class="btn btn-primary">Submit</button>
                 </div>
             </form>
-        </div>
-        <div class="col-3">
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-3">
-        </div>
-        <div class="text-center col-6">
-            <form action="/show-register-form">
-                <button type="btn">Register</button>
-            </form>            
         </div>
         <div class="col-3">
         </div>

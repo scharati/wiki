@@ -13,4 +13,11 @@ def is_email_valid(email):
     if(not email):
         return True
     EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
-    return EMAIL_RE.match(email)    
+    return EMAIL_RE.match(email)
+
+def does_user_exists( email ):
+    if email:
+        user = dbservice.get_user_by_name( email )
+    if user:
+        return True
+    return False 

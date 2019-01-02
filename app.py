@@ -7,6 +7,7 @@ from flask import session as login_session
 import dbservice
 import hashlib
 from functools import wraps
+import validation
 
 app = Flask(__name__)
 
@@ -19,14 +20,16 @@ def login_required( f ):
         else:
             return f(*args, **kwargs)
     return wrapper_func
+  
 
 def authorization_required( f ):
     @wraps( f )
     def wrapper_func(*args, **kwargs):
-        for key in args:
+        for key in kwargs:
             if key == "title":
-                page = dbservice.get_wikipage_by_title( title )
-                page_owner_id = page.owner.id
+                title_val = kwargs.get("title")
+                page = dbservice.get_wikipage_by_title( title_val )
+                page_owner_id = page.owner
                 login_user = get_login_user()
                 if page_owner_id == login_user.id:
                     return f(*args, **kwargs)
@@ -61,7 +64,8 @@ def authenticate_user():
                 app.logger.info("+++ Passwords matched +++")
                 login_session["logged_in_user"] = user.username
                 cookie = make_login_cookie(user.id, user_pwd)
-                resp = app.make_response(render_template( "home.html", user = user ))
+                wikipages = dbservice.get_all_wikipages()
+                resp = app.make_response(redirect( url_for( "show_landing_page" )))
                 resp.set_cookie("mywiki-credentials", cookie )
                 return resp
             else:
@@ -74,11 +78,7 @@ def authenticate_user():
 
 @app.route("/")
 def show_landing_page():
-    username = login_session.get("logged_in_user")
-    if username:
-        user = dbservice.get_user_by_name( username )
-    else:
-        user = None
+    user = get_login_user()
     wikipages = dbservice.get_all_wikipages()
     app.logger.info("pages are:")
     app.logger.info(wikipages)
@@ -93,10 +93,7 @@ def logout():
 @app.route("/<title>")
 def show_page( title ):
     try:
-        username = login_session.get("logged_in_user")
-        user = None
-        if username:
-            user = dbservice.get_user_by_name( username )
+        user = get_login_user()
         page = dbservice.get_wikipage_by_title( title )
         if page:
             return render_template("page.html", user = user,  page = page)
@@ -128,7 +125,7 @@ def complete_edit_page():
     app.logger.info( title )
     new_content = request.form.get("page-content")
     page = dbservice.get_wikipage_by_title( title )
-    user = None
+    user = get_login_user()
     if page:
         page.content = new_content
     return render_template( "page.html", user = user, page = page)
@@ -148,8 +145,29 @@ def create_page( title ):
         return redirect( url_for( "show_landing_page" ) )
     return render_template( "new-page.html", title = title )
 
+@app.route("/show-register-form")
+def register_new_user():
+    return render_template("register-user.html" )
 
-def get_login_user(  ):
+@app.route("/createuser", methods= ["POST"] )
+def create_user():
+    errors = {}
+    pdb.set_trace()
+    email = request.form.get("user_name")
+    password = request.form.get("user_password")
+    confirm_password = request.form.get("confirm_password")
+    if not validation.is_email_valid( email ):
+        errors["email"] = "invalid e-mail"
+    if not validation.is_password_valid( password ):
+        errors["password"] = "incorrect password"
+    if not password == confirm_password:
+        errors["mismatch"] = "passwords did not match"
+    if len(errors) > 0:
+        return render_template("register-user.html", errors = errors)
+    return redirect(url_for( "show_landing_page"))
+
+
+def get_login_user():
     username = login_session.get("logged_in_user")
     user = None
     if username:
@@ -161,6 +179,24 @@ def make_login_cookie(userid, password):
     pwd_string_hash = hashlib.sha256(pwd_string).hexdigest()
     return "%s|%s" % (userid, pwd_string_hash)
 
+def verify_cookie_and_login( ):
+    val = request.cookies.get('mywiki-credentials', None)
+    print("+++ cookie-val is: +++")
+    print( val )
+    if val:
+        parts = val.split("|")
+        if len( parts ) == 2:
+                user_id = parts[0]
+                pwd_hash = parts[1]
+                # get the user from db
+                user =  dbservice.get_user_by_id( user_id )
+                user_pwd_hash = user.pwdhash
+                if user_pwd_hash == pwd_hash:
+                    login_session['logged_in_user'] = user.username
+                    return True
+                else:
+                    return False
+    return False
                 
 
 # starting the server
